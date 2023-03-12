@@ -1,39 +1,62 @@
 #!/usr/bin/python3
+"""tests for the console"""
 import unittest
+from io import StringIO
+from unittest.mock import patch
 import pep8
-import json
 import os
-from datetime import datetime
-from models.base_model import BaseModel
-from models.user import User
-from models.state import State
-from models.city import City
-from models.amenity import Amenity
-from models.place import Place
-from models.review import Review
-from models.engine.file_storage import FileStorage
+import console
+import tests
 from console import HBNBCommand
 
 
-class TestHBNBCommandDocs(unittest.TestCase):
-    """ check for documentation """
-    def test_class_doc(self):
-        """ check for class documentation """
-        self.assertTrue(len(HBNBCommand.__doc__) > 0)
+class TestConsole(unittest.TestCase):
+    """tests for the console, quit and empty"""
 
+    @classmethod
+    def setUpClass(cls):
+        """setup console class for test"""
+        cls.consol = HBNBCommand()
 
-class TestHBNBCommandPep8(unittest.TestCase):
-    """ check for pep8 validation """
-    def test_pep8(self):
-        """ test base and test_base for pep8 conformance """
+    @classmethod
+    def teardown(cls):
+        """tears down"""
+        del cls.consol
+
+    def tearDown(self):
+        """delete file"""
+        try:
+            os.remove("file.json")
+        except Exception:
+            pass
+
+    def test_pep8_console(self):
+        """Pep8 test"""
         style = pep8.StyleGuide(quiet=True)
-        file1 = 'console.py'
-        file2 = 'tests/test_console.py'
-        result = style.check_files([file1, file2])
-        self.assertEqual(result.total_errors, 0,
-                         "Found code style errors (and warning).")
+        p = style.check_files(["console.py"])
+        self.assertEqual(p.total_errors, 0, 'fix Pep8')
 
+    def test_docstrings_in_console(self):
+        """check for doc strings"""
+        self.assertIsNotNone(console.__doc__)
+        self.assertIsNotNone(HBNBCommand.emptyline.__doc__)
+        self.assertIsNotNone(HBNBCommand.do_quit.__doc__)
+        self.assertIsNotNone(HBNBCommand.do_EOF.__doc__)
+        self.assertIsNotNone(HBNBCommand.do_create.__doc__)
+        self.assertIsNotNone(HBNBCommand.do_show.__doc__)
+        self.assertIsNotNone(HBNBCommand.do_destroy.__doc__)
+        self.assertIsNotNone(HBNBCommand.do_all.__doc__)
+        self.assertIsNotNone(HBNBCommand.do_update.__doc__)
+        self.assertIsNotNone(HBNBCommand.default.__doc__)
 
-class TestHBNBCommand(unittest.TestCase):
-    """ tests for class HBNBCommand """
-    pass
+    def test_emptyline(self):
+        """test for empty line"""
+        with patch('sys.stdout', new=StringIO()) as f:
+            self.consol.onecmd("test")
+            self.assertEqual("*** Unknown syntax: test\n", f.getvalue())
+
+    def test_quit(self):
+        """test the quit command works"""
+        with patch('sys.stdout', new=StringIO()) as f:
+            self.consol.onecmd("quit")
+            self.assertEqual('', f.getvalue())
