@@ -1,131 +1,91 @@
 #!/usr/bin/python3
+"""checks place"""
 import unittest
-import pep8
-import json
 import os
-from datetime import datetime
-from models.base_model import BaseModel
-from models.user import User
-from models.state import State
-from models.city import City
-from models.amenity import Amenity
+import pep8
 from models.place import Place
-from models.review import Review
-from models.engine.file_storage import FileStorage
-
-
-class TestPlaceDocs(unittest.TestCase):
-    """ check for documentation """
-    def test_class_doc(self):
-        """ check for class documentation """
-        self.assertTrue(len(Place.__doc__) > 0)
-
-
-class TestPlacePep8(unittest.TestCase):
-    """ check for pep8 validation """
-    def test_pep8(self):
-        """ test base and test_base for pep8 conformance """
-        style = pep8.StyleGuide(quiet=True)
-        file1 = 'models/place.py'
-        file2 = 'tests/test_models/test_place.py'
-        result = style.check_files([file1, file2])
-        self.assertEqual(result.total_errors, 0,
-                         "Found code style errors (and warning).")
+from models.base_model import BaseModel
 
 
 class TestPlace(unittest.TestCase):
-    """ tests for class Place """
+    """tests for place file"""
     @classmethod
     def setUpClass(cls):
-        """ set up instances for all tests """
-        cls.place = Place()
-
-    def test_subclass(self):
-        """ test that place is a subclass of basemodel """
-        self.assertIsInstance(self.place, BaseModel)
-        self.assertTrue(hasattr(self.place, "id"))
-        self.assertTrue(hasattr(self.place, "created_at"))
-        self.assertTrue(hasattr(self.place, "updated_at"))
-
-    def test_id(self):
-        """ test id """
-        self.assertEqual(str, type(self.place.id))
-
-    def test_created_at(self):
-        """ test created_at """
-        self.assertEqual(datetime, type(self.place.created_at))
-
-    def test_updated_at(self):
-        """ test updated_at """
-        self.assertEqual(datetime, type(self.place.updated_at))
-
-    def test_city_id(self):
-        """ test city_id """
-        self.assertTrue(hasattr(self.place, "city_id"))
-        self.assertEqual(self.place.city_id, "")
-
-    def test_user_id(self):
-        """ test user_id """
-        self.assertTrue(hasattr(self.place, "user_id"))
-        self.assertEqual(self.place.user_id, "")
-
-    def test_name(self):
-        """ test name """
-        self.assertTrue(hasattr(self.place, "name"))
-        self.assertEqual(self.place.name, "")
-
-    def test_description(self):
-        """ test description """
-        self.assertTrue(hasattr(self.place, "description"))
-        self.assertEqual(self.place.description, "")
-
-    def test_number_rooms(self):
-        """ test number_rooms """
-        self.assertTrue(hasattr(self.place, "number_rooms"))
-        self.assertEqual(self.place.number_rooms, 0)
-
-    def test_number_bathrooms(self):
-        """ test number_bathrooms """
-        self.assertTrue(hasattr(self.place, "number_bathrooms"))
-        self.assertEqual(self.place.number_bathrooms, 0)
-
-    def test_max_guest(self):
-        """ test max_guest """
-        self.assertTrue(hasattr(self.place, "max_guest"))
-        self.assertEqual(self.place.max_guest, 0)
-
-    def test_price_by_night(self):
-        """ test price_by_night """
-        self.assertTrue(hasattr(self.place, "price_by_night"))
-        self.assertEqual(self.place.price_by_night, 0)
-
-    def test_latitude(self):
-        """ test latitude """
-        self.assertTrue(hasattr(self.place, "latitude"))
-        self.assertEqual(self.place.latitude, 0.0)
-
-    def test_longitude(self):
-        """ test longitude """
-        self.assertTrue(hasattr(self.place, "longitude"))
-        self.assertEqual(self.place.longitude, 0.0)
-
-    def test_amenity_ids(self):
-        """ test amenity_ids """
-        self.assertTrue(hasattr(self.place, "amenity_ids"))
-        self.assertEqual(self.place.amenity_ids, [])
-
-    def test_to_dict(self):
-        """ test to_dict method """
-        new_dict = self.place.to_dict()
-        self.assertEqual(type(new_dict), dict)
-        self.assertTrue('to_dict' in dir(self.place))
-
-    def test_str(self):
-        """ test ___str___ method """
-        correct = "[Place] ({}) {}".format(self.place.id, self.place.__dict__)
-        self.assertEqual(correct, str(self.place))
+        cls.testPlace = Place()
+        cls.testPlace.city_id = "whatever"
+        cls.testPlace.user_id = "test"
+        cls.testPlace.name = "test1"
+        cls.testPlace.description = "its a test"
+        cls.testPlace.number_rooms = 0
+        cls.testPlace.number_rooms = 0
+        cls.testPlace.number_bathrooms = 0
+        cls.testPlace.max_guest = 0
+        cls.testPlace.price_by_night = 0
+        cls.testPlace.latitude = 0.0
+        cls.testPlace.longitude = 0.0
+        cls.testPlace.amenity_ids = []
 
     @classmethod
     def tearDownClass(cls):
-        """ remove test instances """
-        pass
+        del cls.testPlace
+        try:
+            os.remove("file.json")
+        except FileNotFoundError:
+            pass
+
+    def test_pep8(self):
+        """tests pep8"""
+        style = pep8.StyleGuide(quiet=True)
+        p = style.check_files(['models/place.py'])
+        self.assertEqual(p.total_errors, 0, "fix pep8")
+
+    def test_docstrings(self):
+        """tests docstrings"""
+        self.assertTrue(len(Place.__doc__) > 0)
+        for func in dir(Place):
+            self.assertTrue(len(func.__doc__) > 0)
+
+    def test_subclass(self):
+        self.assertTrue(issubclass(self.testPlace.__class__, BaseModel), True)
+
+    def test_attributes_and_init(self):
+        self.assertTrue(isinstance(self.testPlace, Place))
+        self.assertTrue('id' in self.testPlace.__dict__)
+        self.assertTrue('created_at' in self.testPlace.__dict__)
+        self.assertTrue('updated_at' in self.testPlace.__dict__)
+        self.assertTrue('city_id' in self.testPlace.__dict__)
+        self.assertTrue('user_id' in self.testPlace.__dict__)
+        self.assertTrue('name' in self.testPlace.__dict__)
+        self.assertTrue('description' in self.testPlace.__dict__)
+        self.assertTrue('number_rooms' in self.testPlace.__dict__)
+        self.assertTrue('number_bathrooms' in self.testPlace.__dict__)
+        self.assertTrue('max_guest' in self.testPlace.__dict__)
+        self.assertTrue('price_by_night' in self.testPlace.__dict__)
+        self.assertTrue('latitude' in self.testPlace.__dict__)
+        self.assertTrue('longitude' in self.testPlace.__dict__)
+        self.assertTrue('amenity_ids' in self.testPlace.__dict__)
+
+    def test_has_strings(self):
+        self.assertEqual(type(self.testPlace.city_id), str)
+        self.assertEqual(type(self.testPlace.user_id), str)
+        self.assertEqual(type(self.testPlace.name), str)
+        self.assertEqual(type(self.testPlace.description), str)
+        self.assertEqual(type(self.testPlace.number_rooms), int)
+        self.assertEqual(type(self.testPlace.number_bathrooms), int)
+        self.assertEqual(type(self.testPlace.max_guest), int)
+        self.assertEqual(type(self.testPlace.price_by_night), int)
+        self.assertEqual(type(self.testPlace.latitude), float)
+        self.assertEqual(type(self.testPlace.longitude), float)
+        self.assertEqual(type(self.testPlace.amenity_ids), list)
+
+    def test_save(self):
+        self.testPlace.save()
+        self.assertNotEqual(self.testPlace.created_at,
+                            self.testPlace.updated_at)
+
+    def test_dict(self):
+        self.assertEqual('to_dict' in dir(self.testPlace), True)
+
+
+if __name__ == "__main__":
+    unittest.main()

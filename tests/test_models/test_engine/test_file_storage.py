@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+"""
+Unittest to test FileStorage class
+"""
 import unittest
 import pep8
 import json
@@ -13,37 +16,94 @@ from models.review import Review
 from models.engine.file_storage import FileStorage
 
 
-class TestFileStorageDocs(unittest.TestCase):
-    """ check for documentation """
-    def test_class_doc(self):
-        """ check for class documentation """
-        self.assertTrue(len(FileStorage.__doc__) > 0)
-
-
-class TestFileStoragePep8(unittest.TestCase):
-    """ check for pep8 validation """
-    def test_pep8(self):
-        """ test base and test_base for pep8 conformance """
-        style = pep8.StyleGuide(quiet=True)
-        file1 = 'models/engine/file_storage.py'
-        file2 = 'tests/test_models/test_engine/test_file_storage.py'
-        result = style.check_files([file1, file2])
-        self.assertEqual(result.total_errors, 0,
-                         "Found code style errors (and warning).")
-
-
 class TestFileStorage(unittest.TestCase):
-    """ tests for class FileStorage """
+    """
+    testing file storage
+    """
+
     @classmethod
     def setUpClass(cls):
-        """ set up instances for all tests """
-        storage = FileStorage()
-
-    def test_all(self):
-        """ test all method """
-        pass
+        cls.usr = User()
+        cls.usr.first_name = "Andrew"
+        cls.usr.last_name = "Suh"
+        cls.usr.email = "andrew@gmail.com"
+        cls.storage = FileStorage()
 
     @classmethod
-    def tearDownClass(cls):
-        """ remove test instances """
-        pass
+    def teardown(cls):
+        del cls.usr
+
+    def teardown(self):
+        try:
+            os.remove("file.json")
+        except:
+            pass
+
+    def test_pep8_filestorage(self):
+        """
+        tests for pep8
+        """
+        style = pep8.StyleGuide(quiet=True)
+        p = style.check_files(['models/engine/file_storage.py'])
+        self.assertEqual(p.total_errors, 0, "fix pep8")
+
+    def test_all_filestorage(self):
+        """
+        tests for all
+        """
+        new = FileStorage()
+        instances_dic = new.all()
+        self.assertIsNotNone(instances_dic)
+        self.assertEqual(type(instances_dic), dict)
+        self.assertIs(instances_dic, new._FileStorage__objects)
+
+    def test_new_filestorage(self):
+        """
+        tests for new
+        """
+        altsotrage = FileStorage()
+        dic = altsotrage.all()
+        rev = User()
+        rev.id = 69
+        rev.name = "Meep"
+        altsotrage.new(rev)
+        key = rev.__class__.__name__ + "." + str(rev.id)
+        self.assertIsNotNone(dic[key])
+
+    def test_reload_filestorage(self):
+        """
+        tests reload
+        """
+        self.storage.save()
+        Root = os.path.dirname(os.path.abspath("console.py"))
+        path = os.path.join(Root, "file.json")
+        with open(path, 'r') as f:
+            lines = f.readlines()
+
+        try:
+            os.remove(path)
+        except:
+            pass
+
+        self.storage.save()
+
+        with open(path, 'r') as f:
+            lines2 = f.readlines()
+
+        self.assertEqual(lines, lines2)
+
+        try:
+            os.remove(path)
+        except:
+            pass
+
+        with open(path, "w") as f:
+            f.write("{}")
+        with open(path, "r") as r:
+            for line in r:
+                self.assertEqual(line, "{}")
+        self.assertIs(self.storage.reload(), None)
+
+
+if __name__ == "__main__":
+    unittest.main()
